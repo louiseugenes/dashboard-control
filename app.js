@@ -91,7 +91,7 @@ function mostrar(v) {
   $('#titulo').textContent = { login: '', home: 'Resumo', lista: 'Lançamentos', form: S.edit ? 'Editar' : 'Adicionar' }[v];
   $('#nav').style.setProperty('--i', NAV.indexOf(v));
   $$('#nav [data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === v));
-  scrollTo({ top: 0 });
+  $("main").scrollTo({ top: 0 });
 }
 $$('#nav [data-view]').forEach(b => b.onclick = () => {
   const v = b.dataset.view;
