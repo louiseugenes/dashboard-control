@@ -11,7 +11,6 @@ const FORMAS = { credito: 'Crédito', debito: 'Débito', pix: 'Pix', dinheiro: '
 const ORIGENS = { salario: 'Salário', adiantamento: 'Adiantamento', vale: 'Vale', extra: 'Entrada avulsa' };
 const TIPOS_BANCO = { banco: 'Banco', cartao_loja: 'Cartão de loja', outro: 'Outro' };
 const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
-// Paleta categórica validada (dataviz), ordem fixa; cor segue a categoria, não a posição
 const CORES = {
   light: ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7'],
   dark: ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9'],
@@ -29,7 +28,6 @@ const grupoDe = l => cat(l.categoria_id)?.grupo ?? 'Sem categoria';
 const titulo = l => l.descricao || cat(l.categoria_id)?.nome || ORIGENS[l.origem] || (l.tipo === 'investimento' ? 'Investimento' : 'Lançamento');
 const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
-// ---------------- dados ----------------
 async function carregar() {
   const [b, c, cfg] = await Promise.all([
     sb.from('bancos').select('*').order('nome'),
@@ -38,7 +36,6 @@ async function carregar() {
   ]);
   for (const r of [b, c, cfg]) if (r.error) throw r.error;
   S.bancos = b.data; S.categorias = c.data; S.pct = Number(cfg.data?.percentual_investimento ?? 30);
-  // ponytail: carrega tudo de uma vez; anos de uso pessoal cabem fácil na memória
   S.lanc = [];
   for (let i = 0; ; i += 1000) {
     const { data, error } = await sb.from('lancamentos').select('*').order('data').order('id').range(i, i + 999);
@@ -53,8 +50,6 @@ async function carregar() {
 }
 const recarregar = async () => { await carregar(); montarSelects(); renderTudo(); };
 
-// Lançamentos do mês + previstos (meses atuais/futuros):
-// salário, adiantamento e vale repetem o último valor; fixas repetem as do mês anterior.
 function doMes(ym) {
   if (!S.cache.has(ym)) {
     const reais = S.lanc.filter(l => l.data.startsWith(ym));
@@ -73,7 +68,6 @@ function previstos(ym, reais) {
   }
   const fixa = l => l.fixo && l.tipo === 'saida' && !l.parcela_grupo;
   if (!reais.some(fixa)) {
-    // ponytail: "último dia útil" é deduzido pela data do mês anterior (IPTU)
     for (const l of doMes(ant).filter(fixa)) {
       out.push(prever(l, l.data === ultimoDiaUtil(py, pm) ? ultimoDiaUtil(y, m) : comDia(y, m, +l.data.slice(8))));
     }
@@ -91,7 +85,6 @@ const rotPeriodo = p => p.modo === 'ano' ? p.ano : p.modo === 'mes' ? rotMes(p.m
 const calc = ls => calcular(ls, S.pct);
 const campos = l => ({ tipo: l.tipo, origem: l.origem, descricao: l.descricao, valor: l.valor, data: l.data, banco_id: l.banco_id, categoria_id: l.categoria_id, forma_pagamento: l.forma_pagamento, fixo: l.fixo, estimado: l.tipo === 'entrada', pago: false });
 
-// ---------------- navegação / tema ----------------
 const NAV = ['home', 'lista', 'form'];
 function mostrar(v) {
   $$('.view').forEach(el => el.classList.toggle('on', el.id === 'view-' + v));
@@ -117,7 +110,6 @@ function aplicarTema() {
 }
 $('#b-tema').onclick = () => {
   const t = temaAtual() === 'dark' ? 'light' : 'dark', root = document.documentElement;
-  // Se escolher o mesmo tema do aparelho, volta a seguir o aparelho
   try {
     if (t === (sistemaEscuro.matches ? 'dark' : 'light')) { delete root.dataset.theme; localStorage.removeItem('tema'); }
     else { root.dataset.theme = t; localStorage.setItem('tema', t); }
@@ -148,7 +140,6 @@ function contar(el, v) {
   requestAnimationFrame(passo);
 }
 
-// ---------------- login ----------------
 async function entrar(session) {
   S.uid = session.user.id;
   $('#nav').hidden = false;
@@ -175,7 +166,6 @@ $('#b-sair').onclick = async () => {
   mostrar('login');
 };
 
-// ---------------- selects ----------------
 function montarSelects() {
   const keep = (sel, html) => { const v = sel.value; sel.innerHTML = html; sel.value = v; if (sel.selectedIndex < 0) sel.selectedIndex = 0; };
   const grupos = [...new Set(S.categorias.map(c => c.grupo))];
@@ -190,7 +180,6 @@ function montarSelects() {
 
 function renderTudo() { renderHome(); renderLista(); renderAjustes(); }
 
-// ---------------- HOME ----------------
 function periodoHome() {
   const modo = $('input[name=hmodo]:checked').value;
   for (const m of ['mes', 'ano', 'dia']) $('#h-' + m).hidden = m !== modo;
@@ -274,7 +263,6 @@ function graficos(p, ls) {
   const tooltip = { backgroundColor: ink, titleColor: card, bodyColor: card, padding: 10, cornerRadius: 10, displayColors: false,
     callbacks: { label: c => `${c.dataset.label || c.label}: ${brl(c.parsed.y ?? c.parsed)}` } };
 
-  // Barras: entradas x saídas (sem vale) — últimos 6 meses, ou os 12 do ano
   const fim = p.modo === 'ano' ? null : (p.modo === 'mes' ? p.mes : p.dia.slice(0, 7));
   const meses = fim ? [5, 4, 3, 2, 1, 0].map(n => prevMes(fim, -n)) : MESES.map((_, i) => `${p.ano}-${pad(i + 1)}`);
   const dados = meses.map(m => calc(doMes(m)));
@@ -299,7 +287,6 @@ function graficos(p, ls) {
     },
   });
 
-  // Rosca: saídas por grupo de categoria (inclui gastos no vale)
   const tot = new Map();
   for (const l of ls) if (l.tipo === 'saida') {
     const g = S.corGrupo.has(grupoDe(l)) ? grupoDe(l) : 'Demais';
@@ -319,7 +306,6 @@ function graficos(p, ls) {
   });
 }
 
-// ---------------- LISTA ----------------
 function filtros() {
   const v = id => $('#' + id).value, ck = id => $('#' + id).checked;
   return { modo: v('f-modo'), mes: v('f-mes') || mesAtual(), ano: v('f-ano') || hoje().slice(0, 4), dia: v('f-dia') || hoje(),
@@ -391,7 +377,6 @@ $('#lista').onclick = async e => {
   mostrar('form');
 };
 
-// ---------------- FORMULÁRIO ----------------
 const F = $('#form');
 $('#in-parc').innerHTML = Array.from({ length: 24 }, (_, i) => `<option value="${i + 1}">${i ? `${i + 1}×` : 'À vista'}</option>`).join('');
 
@@ -416,7 +401,6 @@ function preencher(l, editar) {
 function ajustarForm() {
   const tipo = F.elements.tipo.value, forma = F.elements.forma.value;
   $$('[data-tipo]', F).forEach(el => el.hidden = !el.dataset.tipo.split(' ').includes(tipo));
-  // forma escondida (ex.: Crédito numa entrada) não pode ficar marcada
   const marcada = F.querySelector('input[name=forma]:checked');
   if (marcada?.closest('[hidden]')) marcada.checked = false;
   const credito = tipo === 'saida' && F.elements.forma.value === 'credito';
@@ -490,7 +474,6 @@ $('#b-excluir').onclick = async () => {
   await recarregar(); mostrar('lista');
 };
 
-// ---------------- bancos / categorias / ajustes ----------------
 function dialogo(tituloDlg, campos, podeExcluir) {
   const d = $('#dlg');
   d.innerHTML = `<form method="dialog"><h2>${esc(tituloDlg)}</h2>${campos.map(c => `<label class="field"><span>${c.l}</span>${c.op
@@ -559,7 +542,6 @@ $('#aj-pct').onchange = async () => {
   S.pct = v; toast('Percentual salvo'); renderHome();
 };
 
-// ---------------- início ----------------
 (async () => {
   aplicarTema();
   iniciarFiltros();

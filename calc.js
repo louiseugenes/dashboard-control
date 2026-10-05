@@ -1,7 +1,6 @@
-// Funções puras: datas (strings YYYY-MM-DD, sem fuso), dinheiro e cálculos do mês.
 export const pad = n => String(n).padStart(2, '0');
 export const hoje = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
-export const ultimoDia = (y, m) => new Date(y, m, 0).getDate(); // m de 1 a 12
+export const ultimoDia = (y, m) => new Date(y, m, 0).getDate();
 export const comDia = (y, m, d) => `${y}-${pad(m)}-${pad(Math.min(d, ultimoDia(y, m)))}`;
 
 export function addMeses(iso, n) {
@@ -16,16 +15,12 @@ export function addDias(iso, n) {
   const [y, m, d] = iso.split('-').map(Number), t = new Date(y, m - 1, d + n);
   return `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}`;
 }
-// ponytail: ignora feriados; trocar por tabela de feriados se precisar
 export function ultimoDiaUtil(y, m) {
   let d = ultimoDia(y, m);
   while ([0, 6].includes(new Date(y, m - 1, d).getDay())) d--;
   return comDia(y, m, d);
 }
 
-// Compra no crédito -> data em que entra na conta.
-// Com dia de fechamento: compra antes do fechamento cai na fatura do mês, no dia/depois cai na do mês seguinte.
-// Sem fechamento (cartão de loja): vence no mesmo dia, um mês depois.
 export function primeiraCobranca(dataCompra, banco) {
   if (!banco?.dia_fechamento) return addMeses(dataCompra, 1);
   const [y, m, d] = dataCompra.split('-').map(Number);
@@ -43,7 +38,6 @@ export function parseValor(s) {
 }
 export const soma = (ls, f) => ls.reduce((a, l) => a + (f(l) ? Math.round(l.valor * 100) : 0), 0) / 100;
 
-// Divide uma compra em n parcelas (centavos que sobram vão na 1ª)
 export function parcelar(base, n, modo) {
   if (n <= 1) return [base];
   const cents = Math.round(base.valor * 100), tot = modo === 'parcela' ? cents * n : cents;
@@ -54,7 +48,6 @@ export function parcelar(base, n, modo) {
   }));
 }
 
-// Vale é separado: não entra nas despesas nem nas entradas "normais"
 export function calcular(ls, pct = 30) {
   const r = {
     entradas: soma(ls, l => l.tipo === 'entrada' && l.origem !== 'vale'),

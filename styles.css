@@ -42,7 +42,6 @@ button { cursor: pointer; }
 .small { font-size: 12px; }
 .mt { margin-top: 16px; }
 
-/* ---------- estrutura ---------- */
 .topbar {
   position: sticky; top: 0; z-index: 5;
   display: flex; align-items: center; justify-content: space-between;
@@ -75,7 +74,6 @@ main { max-width: 560px; margin: 0 auto; padding: 4px 16px calc(120px + env(safe
 .row { display: flex; gap: 10px; align-items: flex-end; }
 .row > .field, .row > .btn { flex: 1; min-width: 0; }
 
-/* ---------- controles ---------- */
 .icon-btn {
   display: grid; place-items: center; flex: none;
   width: 42px; height: 42px; padding: 0;
@@ -99,7 +97,7 @@ main { max-width: 560px; margin: 0 auto; padding: 4px 16px calc(120px + env(safe
 .field > span { font-size: 12px; color: var(--muted); }
 input:not([type=radio]):not([type=checkbox]), select {
   width: 100%; min-height: 46px; padding: 11px 14px;
-  font-size: 16px; /* evita zoom no iOS */
+  font-size: 16px;
   background: var(--soft); border: 1px solid var(--line); border-radius: 14px;
   -webkit-appearance: none; appearance: none; outline: none;
   transition: border-color .2s, background-color .4s;
@@ -131,7 +129,6 @@ input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--text); }
 .badge.good { color: var(--good); background: color-mix(in srgb, var(--good) 13%, transparent); }
 .badge.bad { color: var(--bad); background: color-mix(in srgb, var(--bad) 13%, transparent); }
 
-/* ---------- login ---------- */
 .login { min-height: calc(100dvh - 160px); display: grid; align-content: center; gap: 14px; max-width: 360px; margin: 0 auto; }
 .login h2 { margin: 0; font-size: 32px; text-align: center; }
 .login p { margin: -8px 0 8px; text-align: center; }
@@ -141,7 +138,6 @@ input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--text); }
 .logo span { display: block; width: 100%; height: 100%; border-radius: 50%; background: var(--bg); }
 @keyframes girar { to { transform: rotate(360deg); } }
 
-/* ---------- home ---------- */
 .periodo { display: grid; gap: 10px; margin-bottom: 12px; }
 .periodo-nav { display: flex; gap: 8px; align-items: center; }
 .periodo-nav input { text-align: center; }
@@ -172,7 +168,6 @@ input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--text); }
 .rows .forte dt, .rows .forte dd { color: var(--text); font-weight: 600; }
 .neg { color: var(--bad); }
 
-/* ---------- lista ---------- */
 .filtros summary { display: flex; justify-content: space-between; align-items: center; list-style: none; cursor: pointer; }
 .filtros summary::-webkit-details-marker { display: none; }
 .filtros[open] summary { margin-bottom: 14px; }
@@ -203,14 +198,12 @@ input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--text); }
 .ck.off { border-style: dashed; }
 .vazio { text-align: center; color: var(--muted); padding: 32px 0; }
 
-/* ---------- ajustes ---------- */
 .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .tags button { padding: 8px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--soft); font-size: 13px; }
 .tags button small { color: var(--muted); margin-left: 6px; }
 .tags .add { background: none; border-style: dashed; }
 .grupo { margin-top: 10px; }
 
-/* ---------- nav flutuante ---------- */
 .nav {
   position: fixed; z-index: 10; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 14px);
   display: flex; padding: 6px; transform: translateX(-50%);
@@ -227,7 +220,6 @@ input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--text); }
   transition: transform .45s var(--ease), opacity .3s;
 }
 
-/* ---------- dialog / toast ---------- */
 dialog {
   width: min(92vw, 420px); padding: 20px; border: 1px solid var(--line); border-radius: 24px;
   background: var(--card); color: var(--text); box-shadow: var(--shadow);
