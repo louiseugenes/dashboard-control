@@ -213,8 +213,8 @@ function renderHome() {
 
   contar($('#s1'), r.saldoComVale);
   contar($('#s2'), r.sobra);
-  contar($('#s3'), r.saldoMenosInvest);
-  $('#s3-sub').textContent = r.investido ? `Investido: ${brl(r.investido)}` : `Sugestão ${S.pct}%: ${brl(r.sugestao)}`;
+  contar($('#s3'), r.investido ? r.saldoMenosInvest : c2(r.sobra - r.sugestao));
+  $('#s3-sub').textContent = r.investido ? `Investido: ${brl(r.investido)}` : `Menos sugestão ${S.pct}%: ${brl(r.sugestao)}`;
 
   $('#det').innerHTML = linhas([
     ['Salário + adiantamento + avulsas', r.entradas],
